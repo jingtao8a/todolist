@@ -15,42 +15,15 @@ class Square extends React.Component {
   }
   
   class Board extends React.Component {
-    constructor(props) {
-      super(props);
-      this.state = {
-        squeares: [1, 2, 3, 4, 5, 6, 7, 8, 9].fill(null),
-        xIsNext: true,
-      }
-    }
-
-    handleClick(i) {
-      const square = this.state.squeares.slice();
-      if (calculateWinner(square) || square[i]) {
-        return;
-      }
-      square[i] = this.state.xIsNext ? 'X' : 'O';
-      this.setState({
-        squeares: square,
-        xIsNext: !this.state.xIsNext,});
-    }
-
     renderSquare(i) {
       return <Square 
-        value={this.state.squeares[i]} 
-        onClick={() =>this.handleClick(i)}/>;
+        value={this.props.currentBoardState.squares[i]} 
+        onClick={() =>this.props.onClick(i)}/>;
     }
   
     render() {
-      const winner = calculateWinner(this.state.squeares);
-      let status;
-      if (winner) {
-        status = 'winner:' + winner;
-      } else {
-        status = 'Next player:' + (this.state.xIsNext ? 'X' : 'O');
-      }
       return (
         <div>
-          <div className="status">{status}</div>
           <div className="board-row">
             {this.renderSquare(0)}
             {this.renderSquare(1)}
@@ -72,26 +45,81 @@ class Square extends React.Component {
   }
   
   class Game extends React.Component {
+    constructor(props) {
+      super(props);
+      this.state = {
+        historyOfBoardState:[{
+            squares: Array(9).fill(null),
+            xIsNext: true,
+          }],
+        stepNumber: 0,
+      }
+    }
+    jumpTo(step) {
+      this.setState({
+        stepNumber:step,
+      })
+    }
+
+    handleClick(i) {
+      const historyOfBoardState = this.state.historyOfBoardState.slice(0,this.state.stepNumber + 1);//只截取到stepNumber的拷贝
+      const currentBoardState = historyOfBoardState[historyOfBoardState.length - 1];//当前棋盘的状态
+
+      const square = currentBoardState.squares.slice();
+      if (calculateWinner(square) || square[i]) {//如果当前的square已经填满 或者 赢家已定，直接返回
+        return;
+      }
+      square[i] = currentBoardState.xIsNext ? 'X': 'O';
+      this.setState({
+        historyOfBoardState: historyOfBoardState.concat([{
+          squares:square,
+          xIsNext:!currentBoardState.xIsNext,
+        }]),
+        stepNumber:this.state.stepNumber + 1,
+      });//增加历史记录
+    }
+
     render() {
+      const historyOfBoardState = this.state.historyOfBoardState;
+      const currentBoardState = historyOfBoardState[this.state.stepNumber];//当前棋盘状态
+
+      const winner = calculateWinner(currentBoardState.squares);//计算是否有赢家
+      const moves = historyOfBoardState.map((info, step) => {//多少个记录
+        const desc = step ? 
+          'Go to move #' + step :
+          'Go to game start';
+        return (
+          <li key={step}>
+            <button onClick={() => this.jumpTo(step)}>{desc}</button>
+          </li>
+        );
+      });
+      let status;
+      if (winner) {
+        status = 'winner:' + winner;
+      } else {
+        status = 'Next player:' + (currentBoardState.xIsNext ? 'X' : 'O');
+      }
+
       return (
         <div className="game">
           <div className="game-board">
-            {<Board />}
+            {<Board currentBoardState={currentBoardState} onClick={(i) => this.handleClick(i)}/>}
           </div>
           <div className="game-info">
-            <div>{/* status */}</div>
-            <ol>{/* TODO */}</ol>
+            <div>{status}</div>
+            <ol>{moves}</ol>
           </div>
         </div>
       );
     }
   }
   
-  // ========================================
+// ========================================
   
-  const root = ReactDOM.createRoot(document.getElementById("root"));
-  root.render(<Game />);
-  
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(<Game />);
+
 
 function calculateWinner(squeares) {
   const lines = [
@@ -106,7 +134,7 @@ function calculateWinner(squeares) {
   ];
   for (let i = 0; i < lines.length; ++i) {
     const [a, b, c] = lines[i];
-    if (squeares[a] && squeares[a] == squeares[b] && squeares[b] == squeares[c]) {
+    if (squeares[a] && squeares[a] === squeares[b] && squeares[b] === squeares[c]) {
       return squeares[a];//胜者
     }
   }
