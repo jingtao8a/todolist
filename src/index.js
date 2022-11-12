@@ -51,6 +51,7 @@ class Square extends React.Component {
         historyOfBoardState:[{
             squares: Array(9).fill(null),
             xIsNext: true,
+            change: null,//每一步棋中的更改的坐标
           }],
         stepNumber: 0,
       }
@@ -70,10 +71,12 @@ class Square extends React.Component {
         return;
       }
       square[i] = currentBoardState.xIsNext ? 'X': 'O';
+      let x = Math.floor(i / 3), y = i % 3;
       this.setState({
         historyOfBoardState: historyOfBoardState.concat([{
           squares:square,
           xIsNext:!currentBoardState.xIsNext,
+          change: '(' + x + ',' + y + ')',
         }]),
         stepNumber:this.state.stepNumber + 1,
       });//增加历史记录
@@ -86,7 +89,7 @@ class Square extends React.Component {
       const winner = calculateWinner(currentBoardState.squares);//计算是否有赢家
       const moves = historyOfBoardState.map((info, step) => {//多少个记录
         const desc = step ? 
-          'Go to move #' + step :
+          'Go to move #' + step + ' change:' + info.change + (!info.xIsNext ? 'X' : 'O'):
           'Go to game start';
         return (
           <li key={step}>
