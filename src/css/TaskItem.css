@@ -1,0 +1,32 @@
+div.TaskItem{
+    background-color: white;
+    width: 90%;
+    height: 50px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    letter-spacing: 0.05em;
+    padding: 0 20px;
+}
+
+div.TaskItem .InputCheckBox{
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+div.TaskItem .TaskName{
+    flex-grow: 1;
+    margin: 0 20px;
+}
+
+div.TaskItem .DeleteButton{
+    background-color: #bebebe;
+    border: none;
+    border-radius: 3px;
+    padding: 5px 10px;
+    width: min-content;
+    color: white;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+}

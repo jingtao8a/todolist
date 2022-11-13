@@ -1,0 +1,13 @@
+div.AddTask{
+    display: flex;
+    justify-content:center;
+}
+
+button.addButton{
+    text-align: center;
+}
+
+button.addButton img{
+    width: 20px;
+    height: 20px;
+}
